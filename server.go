@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kuma-coffee/go-search-from-postgresql/controller"
 	"github.com/kuma-coffee/go-search-from-postgresql/entity"
-	router "github.com/kuma-coffee/go-search-from-postgresql/http"
 	"github.com/kuma-coffee/go-search-from-postgresql/repository"
+	"github.com/kuma-coffee/go-search-from-postgresql/scraper"
 	"github.com/kuma-coffee/go-search-from-postgresql/service"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -39,16 +39,30 @@ func main() {
 
 	db.AutoMigrate(&entity.Post{})
 
-	httpRouter := router.NewChiRouter()
 	postRepository := repository.NewPostgresRepository(db)
 	postService := service.NewPostService(postRepository)
 	postController := controller.NewPostController(postService)
+	webScraper := scraper.NewScraper().Scraper()
 
-	// httpRouter.GET("/", func(c *gin.Context) {
-	// 	c.JSON(200, gin.H{"message": "Hello World"})
-	// })
+	server := gin.Default()
 
-	httpRouter.POST("/posts", postController.AddPost)
+	for _, item := range webScraper {
+		if item.Ndex == "#0000" {
+			continue
+		}
+		err := postRepository.Store(&entity.Post{
+			Ndex:       item.Ndex,
+			Pokemon:    item.Pokemon,
+			PokemonURL: item.PokemonURL,
+			Type:       item.Type,
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
 
-	httpRouter.SERVE(":8080")
+	server.POST("/posts", postController.AddPost)
+	server.GET("/posts", postController.FindAll)
+
+	server.Run(":8080")
 }

@@ -10,6 +10,7 @@ import (
 
 type PostController interface {
 	AddPost(c *gin.Context)
+	FindAll(c *gin.Context)
 }
 
 type controller struct {
@@ -35,4 +36,14 @@ func (cp *controller) AddPost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Store data success!"})
+}
+
+func (cp *controller) FindAll(c *gin.Context) {
+	itemList, err := cp.postService.FindAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, itemList)
 }

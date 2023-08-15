@@ -7,6 +7,7 @@ import (
 
 type PostRepository interface {
 	Store(post *entity.Post) error
+	FindAll() ([]entity.Post, error)
 }
 
 type repo struct {
@@ -24,4 +25,15 @@ func (r *repo) Store(post *entity.Post) error {
 	}
 
 	return nil
+}
+
+func (r *repo) FindAll() ([]entity.Post, error) {
+	result := []entity.Post{}
+
+	err := r.db.Table("posts").Select("*").Scan(&result).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

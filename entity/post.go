@@ -1,8 +1,10 @@
 package entity
 
+import "github.com/lib/pq"
+
 type Post struct {
-	Ndex       int      `json:"ndex" gorm:"primaryKey"`
-	Pokemon    string   `json:"pokemon" gorm:"type:varchar(255);not null"`
-	PokemonURL string   `json:"pokemon_url" gorm:"type:varchar(255);not null"`
-	Type       []string `json:"type" gorm:"type:varchar(255);"`
+	Ndex       string         `json:"ndex" gorm:"primaryKey"`
+	Pokemon    string         `json:"pokemon"`
+	PokemonURL string         `json:"pokemon_url"`
+	Type       pq.StringArray `json:"type" gorm:"type:text[]"`
 }
