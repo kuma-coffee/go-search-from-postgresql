@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kuma-coffee/go-search-from-postgresql/entity"
@@ -11,6 +12,7 @@ import (
 type PostController interface {
 	AddPost(c *gin.Context)
 	FindAll(c *gin.Context)
+	Search(c *gin.Context)
 }
 
 type controller struct {
@@ -24,12 +26,13 @@ func NewPostController(postService service.PostService) PostController {
 func (cp *controller) AddPost(c *gin.Context) {
 	var newPost entity.Post
 
-	if err := c.ShouldBindJSON(&newPost); err != nil {
+	err := c.ShouldBindJSON(&newPost)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err := cp.postService.Store(&newPost)
+	err = cp.postService.Store(&newPost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -40,6 +43,25 @@ func (cp *controller) AddPost(c *gin.Context) {
 
 func (cp *controller) FindAll(c *gin.Context) {
 	itemList, err := cp.postService.FindAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, itemList)
+}
+
+func (cp *controller) Search(c *gin.Context) {
+	var query entity.Query
+	err := c.Bind(&query)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	querySplit := strings.Fields(query.QueryParams)
+
+	itemList, err := cp.postService.Search(querySplit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return

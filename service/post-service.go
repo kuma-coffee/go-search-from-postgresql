@@ -8,6 +8,7 @@ import (
 type PostService interface {
 	Store(post *entity.Post) error
 	FindAll() ([]entity.Post, error)
+	Search(query []string) ([]entity.Post, error)
 }
 
 type service struct {
@@ -24,4 +25,8 @@ func (s *service) Store(post *entity.Post) error {
 
 func (s *service) FindAll() ([]entity.Post, error) {
 	return s.postRepo.FindAll()
+}
+
+func (s *service) Search(query []string) ([]entity.Post, error) {
+	return s.postRepo.Search(query)
 }

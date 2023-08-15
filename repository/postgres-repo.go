@@ -8,6 +8,8 @@ import (
 type PostRepository interface {
 	Store(post *entity.Post) error
 	FindAll() ([]entity.Post, error)
+	Search(query []string) ([]entity.Post, error)
+	Reset(table string) error
 }
 
 type repo struct {
@@ -36,4 +38,37 @@ func (r *repo) FindAll() ([]entity.Post, error) {
 	}
 
 	return result, nil
+}
+
+func (r *repo) Search(query []string) ([]entity.Post, error) {
+	result := []entity.Post{}
+
+	for _, val := range query {
+		temp := entity.Post{}
+
+		err := r.db.Table("posts").Where(
+			r.db.Where("ndex LIKE ?", val).Or("pokemon LIKE ?", val),
+		).Scan(&temp).Error
+		if err != nil {
+			return nil, err
+		}
+
+		err = r.db.Table("posts").Where("? = ANY(type)", val).Scan(&result).Error
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, temp)
+	}
+	return result, nil
+}
+
+func (r *repo) Reset(table string) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec("TRUNCATE " + table).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
 }

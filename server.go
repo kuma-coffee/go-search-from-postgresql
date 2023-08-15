@@ -44,6 +44,11 @@ func main() {
 	postController := controller.NewPostController(postService)
 	webScraper := scraper.NewScraper().Scraper()
 
+	err = postRepository.Reset("posts")
+	if err != nil {
+		panic(err)
+	}
+
 	server := gin.Default()
 
 	for _, item := range webScraper {
@@ -63,6 +68,7 @@ func main() {
 
 	server.POST("/posts", postController.AddPost)
 	server.GET("/posts", postController.FindAll)
+	server.GET("/search", postController.Search)
 
 	server.Run(":8080")
 }
