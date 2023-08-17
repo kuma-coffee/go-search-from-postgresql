@@ -68,8 +68,6 @@ func main() {
 
 	server.POST("/posts", postController.AddPost)
 	server.GET("/posts", postController.FindAll)
-	server.GET("/search", postController.Search)
-	server.GET("/sort", postController.Sort)
 
 	server.Run(":8080")
 }

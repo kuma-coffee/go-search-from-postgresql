@@ -43,6 +43,37 @@ func (cp *controller) AddPost(c *gin.Context) {
 }
 
 func (cp *controller) FindAll(c *gin.Context) {
+	var query entity.Query
+	err := c.Bind(&query)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if query.SearchQuery != "" {
+		querySplit := strings.Fields(query.SearchQuery)
+
+		itemList, err := cp.postService.Search(querySplit)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, itemList)
+		return
+	}
+
+	if query.SortQuery != "" {
+		itemList, err := cp.postService.Sort(query.SortQuery)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, itemList)
+		return
+	}
+
 	itemList, err := cp.postService.FindAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
@@ -60,7 +91,7 @@ func (cp *controller) Search(c *gin.Context) {
 		return
 	}
 
-	querySplit := strings.Fields(query.QueryParams)
+	querySplit := strings.Fields(query.SearchQuery)
 
 	itemList, err := cp.postService.Search(querySplit)
 	if err != nil {

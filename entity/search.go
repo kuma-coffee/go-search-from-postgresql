@@ -1,6 +1,6 @@
 package entity
 
 type Query struct {
-	QueryParams string `form:"q"`
+	SearchQuery string `form:"search"`
 	SortQuery   string `form:"sort"`
 }
