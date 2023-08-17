@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"sort"
+
 	"github.com/kuma-coffee/go-search-from-postgresql/entity"
 	"gorm.io/gorm"
 )
@@ -9,6 +11,7 @@ type PostRepository interface {
 	Store(post *entity.Post) error
 	FindAll() ([]entity.Post, error)
 	Search(query []string) ([]entity.Post, error)
+	Sort(query string) ([]entity.Post, error)
 	Reset(table string) error
 }
 
@@ -58,6 +61,30 @@ func (r *repo) Search(query []string) ([]entity.Post, error) {
 		}
 	}
 	return result, nil
+}
+
+func (r *repo) Sort(query string) ([]entity.Post, error) {
+	datas, _ := r.FindAll()
+
+	if query == "aToZAscending" {
+		sort.SliceStable(datas, func(i, j int) bool {
+			return datas[i].Pokemon < datas[j].Pokemon
+		})
+	} else if query == "aToZDescending" {
+		sort.SliceStable(datas, func(i, j int) bool {
+			return datas[i].Pokemon > datas[j].Pokemon
+		})
+	} else if query == "ndexAscending" {
+		sort.SliceStable(datas, func(i, j int) bool {
+			return datas[i].Ndex < datas[j].Ndex
+		})
+	} else if query == "ndexDescending" {
+		sort.SliceStable(datas, func(i, j int) bool {
+			return datas[i].Ndex > datas[j].Ndex
+		})
+	}
+
+	return datas, nil
 }
 
 func (r *repo) Reset(table string) error {

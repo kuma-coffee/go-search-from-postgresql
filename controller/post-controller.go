@@ -13,6 +13,7 @@ type PostController interface {
 	AddPost(c *gin.Context)
 	FindAll(c *gin.Context)
 	Search(c *gin.Context)
+	Sort(c *gin.Context)
 }
 
 type controller struct {
@@ -62,6 +63,23 @@ func (cp *controller) Search(c *gin.Context) {
 	querySplit := strings.Fields(query.QueryParams)
 
 	itemList, err := cp.postService.Search(querySplit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, itemList)
+}
+
+func (cp *controller) Sort(c *gin.Context) {
+	var query entity.Query
+	err := c.Bind(&query)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	itemList, err := cp.postService.Sort(query.SortQuery)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return

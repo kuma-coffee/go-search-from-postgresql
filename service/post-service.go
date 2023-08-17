@@ -9,6 +9,7 @@ type PostService interface {
 	Store(post *entity.Post) error
 	FindAll() ([]entity.Post, error)
 	Search(query []string) ([]entity.Post, error)
+	Sort(query string) ([]entity.Post, error)
 }
 
 type service struct {
@@ -29,4 +30,8 @@ func (s *service) FindAll() ([]entity.Post, error) {
 
 func (s *service) Search(query []string) ([]entity.Post, error) {
 	return s.postRepo.Search(query)
+}
+
+func (s *service) Sort(query string) ([]entity.Post, error) {
+	return s.postRepo.Sort(query)
 }
