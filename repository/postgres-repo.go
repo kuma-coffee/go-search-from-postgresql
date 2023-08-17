@@ -44,11 +44,10 @@ func (r *repo) Search(query []string) ([]entity.Post, error) {
 	result := []entity.Post{}
 
 	for _, val := range query {
-		temp := entity.Post{}
 
 		err := r.db.Table("posts").Where(
-			r.db.Where("ndex LIKE ?", val).Or("pokemon LIKE ?", val),
-		).Scan(&temp).Error
+			r.db.Where("ndex LIKE ?", val).Or("pokemon LIKE ?", "%"+val+"%"),
+		).Scan(&result).Error
 		if err != nil {
 			return nil, err
 		}
@@ -57,8 +56,6 @@ func (r *repo) Search(query []string) ([]entity.Post, error) {
 		if err != nil {
 			return nil, err
 		}
-
-		result = append(result, temp)
 	}
 	return result, nil
 }
